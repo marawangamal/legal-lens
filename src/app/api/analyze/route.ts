@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           model: 'qwen2.5vl',
           prompt:
-            'Analyze this image and provide a detailed description of what you see. Include any text, objects, people, or important details.',
+            'Parse information in the image and create a simple two-column table with the format "Field | Value". Extract all visible text, numbers, and important details. Use | to separate columns.',
           images: [base64Data],
           stream: false,
         }),

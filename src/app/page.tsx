@@ -170,6 +170,122 @@ export default function Home() {
     }
   };
 
+  const formatAnalysisResults = (analysis: string) => {
+    // Try to parse as JSON first
+    try {
+      const parsed = JSON.parse(analysis);
+      return (
+        <div className="space-y-2">
+          {Object.entries(parsed).map(([key, value]) => (
+            <div key={key} className="flex border-b border-gray-200 py-2">
+              <div className="font-semibold text-gray-800 w-1/3 pr-4">
+                {key}:
+              </div>
+              <div className="text-gray-900 flex-1 font-medium">
+                {String(value)}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    } catch {
+      // If not JSON, try to parse as table format
+      const lines = analysis.split('\n').filter(line => line.trim());
+
+      // Look for table patterns
+      const tablePattern = /\|(.+)\|/;
+      const hasTableFormat = lines.some(line => tablePattern.test(line));
+
+      if (hasTableFormat) {
+        return (
+          <div className="overflow-x-auto">
+            <table className="min-w-full border border-gray-400 bg-white">
+              <tbody>
+                {lines.map((line, index) => {
+                  if (line.includes('|')) {
+                    const cells = line.split('|').filter(cell => cell.trim());
+                    return (
+                      <tr
+                        key={index}
+                        className={
+                          index === 0
+                            ? 'bg-gray-100 font-bold text-gray-900'
+                            : 'hover:bg-gray-50'
+                        }
+                      >
+                        {cells.map((cell, cellIndex) => (
+                          <td
+                            key={cellIndex}
+                            className="border border-gray-400 px-4 py-3 text-sm text-gray-900"
+                          >
+                            {cell.trim()}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  } else if (line.includes(':') && !line.includes('|')) {
+                    // Handle key-value pairs
+                    const [key, ...valueParts] = line.split(':');
+                    const value = valueParts.join(':').trim();
+                    return (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="border border-gray-400 px-4 py-3 text-sm font-bold text-gray-800 bg-gray-100">
+                          {key.trim()}
+                        </td>
+                        <td className="border border-gray-400 px-4 py-3 text-sm text-gray-900 font-medium">
+                          {value}
+                        </td>
+                      </tr>
+                    );
+                  } else {
+                    return (
+                      <tr key={index}>
+                        <td
+                          colSpan={2}
+                          className="border border-gray-400 px-4 py-3 text-sm text-gray-900"
+                        >
+                          {line}
+                        </td>
+                      </tr>
+                    );
+                  }
+                })}
+              </tbody>
+            </table>
+          </div>
+        );
+      }
+
+      // If no table format, display as formatted text
+      return (
+        <div className="space-y-3">
+          {lines.map((line, index) => {
+            if (line.includes(':')) {
+              const [key, ...valueParts] = line.split(':');
+              const value = valueParts.join(':').trim();
+              return (
+                <div key={index} className="flex border-b border-gray-300 py-3">
+                  <div className="font-bold text-gray-800 w-1/3 pr-4">
+                    {key.trim()}:
+                  </div>
+                  <div className="text-gray-900 flex-1 font-medium">
+                    {value}
+                  </div>
+                </div>
+              );
+            } else {
+              return (
+                <div key={index} className="py-2">
+                  <span className="text-gray-900 font-medium">{line}</span>
+                </div>
+              );
+            }
+          })}
+        </div>
+      );
+    }
+  };
+
   const renderFileViewer = () => {
     if (!showViewer || selectedFileIndex === -1 || !files[selectedFileIndex])
       return null;
@@ -300,10 +416,13 @@ export default function Home() {
                       Analysis Results:
                     </h5>
                     <div className="bg-white rounded border p-3 max-h-96 overflow-auto">
-                      <pre className="text-xs text-gray-800 whitespace-pre-wrap">
-                        {currentFile.analysis.analysis ||
-                          JSON.stringify(currentFile.analysis, null, 2)}
-                      </pre>
+                      {currentFile.analysis.analysis ? (
+                        formatAnalysisResults(currentFile.analysis.analysis)
+                      ) : (
+                        <pre className="text-xs text-gray-800 whitespace-pre-wrap">
+                          {JSON.stringify(currentFile.analysis, null, 2)}
+                        </pre>
+                      )}
                     </div>
                   </div>
                 )}
