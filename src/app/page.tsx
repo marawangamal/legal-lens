@@ -8,6 +8,43 @@ import {
   canViewFile,
   canAnalyzeFile,
 } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import {
+  Upload,
+  FileText,
+  Image,
+  File,
+  Eye,
+  Brain,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  AlertCircle,
+} from 'lucide-react';
 
 interface FileInfo {
   name: string;
@@ -175,15 +212,16 @@ export default function Home() {
     try {
       const parsed = JSON.parse(analysis);
       return (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {Object.entries(parsed).map(([key, value]) => (
-            <div key={key} className="flex border-b border-gray-200 py-2">
-              <div className="font-semibold text-gray-800 w-1/3 pr-4">
+            <div
+              key={key}
+              className="flex items-start space-x-4 p-3 bg-muted/50 rounded-lg"
+            >
+              <div className="font-semibold text-sm text-muted-foreground min-w-[120px]">
                 {key}:
               </div>
-              <div className="text-gray-900 flex-1 font-medium">
-                {String(value)}
-              </div>
+              <div className="text-sm font-medium flex-1">{String(value)}</div>
             </div>
           ))}
         </div>
@@ -199,59 +237,47 @@ export default function Home() {
       if (hasTableFormat) {
         return (
           <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-400 bg-white">
-              <tbody>
+            <Table>
+              <TableBody>
                 {lines.map((line, index) => {
                   if (line.includes('|')) {
                     const cells = line.split('|').filter(cell => cell.trim());
                     return (
-                      <tr
-                        key={index}
-                        className={
-                          index === 0
-                            ? 'bg-gray-100 font-bold text-gray-900'
-                            : 'hover:bg-gray-50'
-                        }
-                      >
+                      <TableRow key={index}>
                         {cells.map((cell, cellIndex) => (
-                          <td
+                          <TableCell
                             key={cellIndex}
-                            className="border border-gray-400 px-4 py-3 text-sm text-gray-900"
+                            className={
+                              index === 0 ? 'font-bold bg-muted/50' : ''
+                            }
                           >
                             {cell.trim()}
-                          </td>
+                          </TableCell>
                         ))}
-                      </tr>
+                      </TableRow>
                     );
                   } else if (line.includes(':') && !line.includes('|')) {
                     // Handle key-value pairs
                     const [key, ...valueParts] = line.split(':');
                     const value = valueParts.join(':').trim();
                     return (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="border border-gray-400 px-4 py-3 text-sm font-bold text-gray-800 bg-gray-100">
+                      <TableRow key={index}>
+                        <TableCell className="font-semibold bg-muted/50">
                           {key.trim()}
-                        </td>
-                        <td className="border border-gray-400 px-4 py-3 text-sm text-gray-900 font-medium">
-                          {value}
-                        </td>
-                      </tr>
+                        </TableCell>
+                        <TableCell>{value}</TableCell>
+                      </TableRow>
                     );
                   } else {
                     return (
-                      <tr key={index}>
-                        <td
-                          colSpan={2}
-                          className="border border-gray-400 px-4 py-3 text-sm text-gray-900"
-                        >
-                          {line}
-                        </td>
-                      </tr>
+                      <TableRow key={index}>
+                        <TableCell colSpan={2}>{line}</TableCell>
+                      </TableRow>
                     );
                   }
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         );
       }
@@ -264,19 +290,20 @@ export default function Home() {
               const [key, ...valueParts] = line.split(':');
               const value = valueParts.join(':').trim();
               return (
-                <div key={index} className="flex border-b border-gray-300 py-3">
-                  <div className="font-bold text-gray-800 w-1/3 pr-4">
+                <div
+                  key={index}
+                  className="flex items-start space-x-4 p-3 bg-muted/50 rounded-lg"
+                >
+                  <div className="font-semibold text-sm text-muted-foreground min-w-[120px]">
                     {key.trim()}:
                   </div>
-                  <div className="text-gray-900 flex-1 font-medium">
-                    {value}
-                  </div>
+                  <div className="text-sm font-medium flex-1">{value}</div>
                 </div>
               );
             } else {
               return (
-                <div key={index} className="py-2">
-                  <span className="text-gray-900 font-medium">{line}</span>
+                <div key={index} className="p-3">
+                  <span className="text-sm font-medium">{line}</span>
                 </div>
               );
             }
@@ -296,313 +323,382 @@ export default function Home() {
       : '';
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b">
-            <h3 className="text-lg font-semibold text-gray-900 truncate">
-              {currentFile.name}
-            </h3>
-            <button
-              onClick={closeViewer}
-              className="text-gray-500 hover:text-gray-700 text-2xl"
-            >
-              ×
-            </button>
-          </div>
+      <Dialog open={showViewer} onOpenChange={closeViewer}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <File className="h-5 w-5" />
+              <span className="truncate">{currentFile.name}</span>
+            </DialogTitle>
+          </DialogHeader>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between p-4 bg-gray-50">
-            <button
+          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+            <Button
               onClick={prevFile}
               disabled={selectedFileIndex === 0}
-              className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-blue-600"
+              variant="outline"
+              size="sm"
             >
-              ← Previous
-            </button>
-            <span className="text-gray-600">
+              <ChevronLeft className="h-4 w-4 mr-2" />
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
               {selectedFileIndex + 1} of {files.length}
             </span>
-            <button
+            <Button
               onClick={nextFile}
               disabled={selectedFileIndex === files.length - 1}
-              className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-blue-600"
+              variant="outline"
+              size="sm"
             >
-              Next →
-            </button>
+              Next
+              <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
           </div>
 
           {/* Keyboard shortcuts hint */}
-          <div className="px-4 py-2 bg-blue-50 text-blue-700 text-xs">
+          <div className="px-4 py-2 bg-blue-50 text-blue-700 text-xs rounded-lg border border-blue-200">
             💡 Use arrow keys to navigate, ESC to close
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-auto p-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+          <div className="flex-1 overflow-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
               {/* File Display */}
-              <div className="bg-gray-100 rounded-lg p-4 overflow-auto">
-                {currentFile.type.startsWith('image/') ? (
-                  <div className="flex justify-center">
-                    <img
-                      src={fileUrl}
-                      alt={currentFile.name}
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  </div>
-                ) : currentFile.type.includes('pdf') ? (
-                  <div className="w-full h-full">
-                    <iframe
-                      src={fileUrl}
-                      className="w-full h-full min-h-[500px]"
-                      title={currentFile.name}
-                    />
-                  </div>
-                ) : currentFile.type.includes('text') ||
-                  currentFile.name.endsWith('.txt') ||
-                  currentFile.name.endsWith('.md') ? (
-                  <pre className="text-sm whitespace-pre-wrap font-mono">
-                    {currentFile.content || 'No content available'}
-                  </pre>
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <div className="text-6xl mb-4">📄</div>
-                      <p className="text-gray-600">
-                        Preview not available for this file type
-                      </p>
-                      <p className="text-sm text-gray-500 mt-2">
-                        {currentFile.type}
-                      </p>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">File Preview</CardTitle>
+                </CardHeader>
+                <CardContent className="h-[500px] overflow-auto">
+                  {currentFile.type.startsWith('image/') ? (
+                    <div className="flex justify-center h-full">
+                      <img
+                        src={fileUrl}
+                        alt={currentFile.name}
+                        className="max-w-full max-h-full object-contain rounded-lg"
+                      />
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Analysis Panel */}
-              <div className="bg-gray-50 rounded-lg p-4 overflow-auto">
-                <div className="mb-4">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                    AI Analysis
-                  </h4>
-                  {canAnalyzeFile(currentFile) ? (
-                    <div className="space-y-3">
-                      <button
-                        onClick={() => analyzeFile(selectedFileIndex)}
-                        disabled={isAnalyzing === selectedFileIndex}
-                        className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                      >
-                        {isAnalyzing === selectedFileIndex
-                          ? 'Analyzing...'
-                          : 'Analyze with AI'}
-                      </button>
+                  ) : currentFile.type.includes('pdf') ? (
+                    <div className="w-full h-full">
+                      <iframe
+                        src={fileUrl}
+                        className="w-full h-full min-h-[500px] rounded-lg border"
+                        title={currentFile.name}
+                      />
                     </div>
+                  ) : currentFile.type.includes('text') ||
+                    currentFile.name.endsWith('.txt') ||
+                    currentFile.name.endsWith('.md') ? (
+                    <pre className="text-sm whitespace-pre-wrap font-mono bg-muted/50 p-4 rounded-lg h-full overflow-auto">
+                      {currentFile.content || 'No content available'}
+                    </pre>
                   ) : (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                      <p className="text-yellow-800 text-sm">
-                        <strong>Image Analysis Only:</strong> This file type
-                        cannot be analyzed with the current AI model. Only image
-                        files (JPG, PNG, GIF, WebP, etc.) are supported for AI
-                        analysis.
-                      </p>
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <File className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">
+                          Preview not available for this file type
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {currentFile.type}
+                        </p>
+                      </div>
                     </div>
                   )}
-                </div>
+                </CardContent>
+              </Card>
 
-                {/* Analysis Results */}
-                {currentFile.analysis && (
-                  <div className="mt-4">
-                    <h5 className="font-medium text-gray-900 mb-2">
-                      Analysis Results:
-                    </h5>
-                    <div className="bg-white rounded border p-3 max-h-96 overflow-auto">
-                      {currentFile.analysis.analysis ? (
-                        formatAnalysisResults(currentFile.analysis.analysis)
+              {/* Analysis Panel */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center space-x-2">
+                    <Brain className="h-5 w-5" />
+                    <span>AI Analysis</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {canAnalyzeFile(currentFile) ? (
+                    <Button
+                      onClick={() => analyzeFile(selectedFileIndex)}
+                      disabled={isAnalyzing === selectedFileIndex}
+                      className="w-full"
+                      size="lg"
+                    >
+                      {isAnalyzing === selectedFileIndex ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                          Analyzing...
+                        </>
                       ) : (
-                        <pre className="text-xs text-gray-800 whitespace-pre-wrap">
-                          {JSON.stringify(currentFile.analysis, null, 2)}
-                        </pre>
+                        <>
+                          <Brain className="h-4 w-4 mr-2" />
+                          Analyze with AI
+                        </>
                       )}
+                    </Button>
+                  ) : (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <div className="flex items-start space-x-2">
+                        <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                        <div>
+                          <p className="text-yellow-800 text-sm font-medium">
+                            Image Analysis Only
+                          </p>
+                          <p className="text-yellow-700 text-sm mt-1">
+                            This file type cannot be analyzed with the current
+                            AI model. Only image files (JPG, PNG, GIF, WebP,
+                            etc.) are supported.
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+
+                  {/* Analysis Results */}
+                  {currentFile.analysis && (
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <h5 className="font-medium">Analysis Results</h5>
+                      </div>
+                      <div className="bg-muted/30 rounded-lg p-4 max-h-96 overflow-auto border">
+                        {currentFile.analysis.analysis ? (
+                          formatAnalysisResults(currentFile.analysis.analysis)
+                        ) : (
+                          <pre className="text-xs text-muted-foreground whitespace-pre-wrap">
+                            {JSON.stringify(currentFile.analysis, null, 2)}
+                          </pre>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </div>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Legal Lens</h1>
-          <p className="text-lg text-gray-600">
-            Upload a folder to count, display, and analyze files with AI
+    <div className="min-h-screen bg-background py-8 px-4">
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center space-x-3">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <FileText className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight">Legal Lens</h1>
+          </div>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Upload a folder to count, display, and analyze files with AI-powered
+            insights
           </p>
         </div>
 
         {/* File Upload Section */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
-            <input
-              {...({
-                type: 'file',
-                webkitdirectory: '',
-                directory: '',
-                multiple: true,
-                onChange: handleFolderUpload,
-                className: 'hidden',
-                id: 'folder-upload',
-                disabled: isLoading,
-              } as DirectoryInputProps)}
-            />
-            <label htmlFor="folder-upload" className="cursor-pointer block">
-              <div className="text-6xl mb-4">📁</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {isLoading ? 'Processing files...' : 'Click to select a folder'}
-              </h3>
-              <p className="text-gray-500">
-                {isLoading
-                  ? 'Please wait while we process your files'
-                  : 'Select a folder containing images, documents, or other files'}
-              </p>
-            </label>
-          </div>
-        </div>
+        <Card className="border-dashed border-2 border-muted-foreground/25 hover:border-primary/50 transition-colors">
+          <CardContent className="p-8">
+            <div className="text-center space-y-4">
+              <input
+                {...({
+                  type: 'file',
+                  webkitdirectory: '',
+                  directory: '',
+                  multiple: true,
+                  onChange: handleFolderUpload,
+                  className: 'hidden',
+                  id: 'folder-upload',
+                  disabled: isLoading,
+                } as DirectoryInputProps)}
+              />
+              <Label htmlFor="folder-upload" className="cursor-pointer block">
+                <div className="p-6 bg-primary/5 rounded-full w-24 h-24 mx-auto mb-4 flex items-center justify-center">
+                  <Upload className="h-12 w-12 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">
+                  {isLoading
+                    ? 'Processing files...'
+                    : 'Click to select a folder'}
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  {isLoading
+                    ? 'Please wait while we process your files'
+                    : 'Select a folder containing images, documents, or other files'}
+                </p>
+                {isLoading && (
+                  <div className="space-y-2">
+                    <Progress value={50} className="w-full max-w-md mx-auto" />
+                    <p className="text-sm text-muted-foreground">
+                      Processing files...
+                    </p>
+                  </div>
+                )}
+              </Label>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
-            <p className="text-red-800">{error}</p>
-          </div>
+          <Card className="border-destructive/50 bg-destructive/5">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2 text-destructive">
+                <AlertCircle className="h-5 w-5" />
+                <p className="font-medium">{error}</p>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* File Count Summary */}
         {files.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              File Summary
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-blue-50 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-blue-600">
-                  {files.length}
+          <Card>
+            <CardHeader>
+              <CardTitle>File Summary</CardTitle>
+              <CardDescription>
+                Overview of uploaded files and their statistics
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center space-y-2">
+                  <div className="p-4 bg-primary/10 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                    <File className="h-8 w-8 text-primary" />
+                  </div>
+                  <div className="text-3xl font-bold">{files.length}</div>
+                  <div className="text-muted-foreground">Total Files</div>
                 </div>
-                <div className="text-blue-800">Total Files</div>
-              </div>
-              <div className="bg-green-50 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-green-600">
-                  {formatFileSize(
-                    files.reduce((sum, file) => sum + file.size, 0)
-                  )}
+                <div className="text-center space-y-2">
+                  <div className="p-4 bg-green-500/10 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                    <FileText className="h-8 w-8 text-green-600" />
+                  </div>
+                  <div className="text-3xl font-bold">
+                    {formatFileSize(
+                      files.reduce((sum, file) => sum + file.size, 0)
+                    )}
+                  </div>
+                  <div className="text-muted-foreground">Total Size</div>
                 </div>
-                <div className="text-green-800">Total Size</div>
-              </div>
-              <div className="bg-purple-50 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-purple-600">
-                  {new Set(files.map(f => f.type)).size}
+                <div className="text-center space-y-2">
+                  <div className="p-4 bg-purple-500/10 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                    <Image className="h-8 w-8 text-purple-600" />
+                  </div>
+                  <div className="text-3xl font-bold">
+                    {new Set(files.map(f => f.type)).size}
+                  </div>
+                  <div className="text-muted-foreground">File Types</div>
                 </div>
-                <div className="text-purple-800">File Types</div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* File List */}
         {files.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              File Details
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      File
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Size
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Modified
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {files.map((file, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <span className="text-2xl mr-3">
-                            {getFileTypeIcon(file.type)}
-                          </span>
-                          <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
-                            {file.name}
-                          </div>
-                          {file.type.startsWith('image/') && file.file && (
-                            <div className="ml-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>File Details</CardTitle>
+              <CardDescription>
+                Browse and interact with your uploaded files
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>File</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Size</TableHead>
+                      <TableHead>Modified</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {files.map((file, index) => (
+                      <TableRow key={index} className="hover:bg-muted/50">
+                        <TableCell>
+                          <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-muted rounded-lg">
+                              <span className="text-lg">
+                                {getFileTypeIcon(file.type)}
+                              </span>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="font-medium truncate max-w-xs">
+                                {file.name}
+                              </div>
+                              {file.analysis && (
+                                <Badge variant="secondary" className="text-xs">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Analyzed
+                                </Badge>
+                              )}
+                            </div>
+                            {file.type.startsWith('image/') && file.file && (
                               <img
                                 src={URL.createObjectURL(file.file)}
                                 alt={file.name}
-                                className="w-8 h-8 object-cover rounded border"
+                                className="w-10 h-10 object-cover rounded-lg border"
                               />
-                            </div>
-                          )}
-                          {file.analysis && (
-                            <span className="ml-2 text-green-500 text-xs">
-                              ✓ Analyzed
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {file.type || 'Unknown'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatFileSize(file.size)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(file.lastModified)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div className="flex space-x-2">
-                          {canViewFile(file) && (
-                            <button
-                              onClick={() => openViewer(index)}
-                              className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600 transition-colors"
-                            >
-                              View
-                            </button>
-                          )}
-                          {canAnalyzeFile(file) && (
-                            <button
-                              onClick={() => analyzeFile(index)}
-                              disabled={isAnalyzing === index}
-                              className="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                            >
-                              {isAnalyzing === index
-                                ? 'Analyzing...'
-                                : 'Analyze'}
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {file.type || 'Unknown'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatFileSize(file.size)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(file.lastModified)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            {canViewFile(file) && (
+                              <Button
+                                onClick={() => openViewer(index)}
+                                variant="outline"
+                                size="sm"
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                View
+                              </Button>
+                            )}
+                            {canAnalyzeFile(file) && (
+                              <Button
+                                onClick={() => analyzeFile(index)}
+                                disabled={isAnalyzing === index}
+                                size="sm"
+                              >
+                                {isAnalyzing === index ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2" />
+                                    Analyzing
+                                  </>
+                                ) : (
+                                  <>
+                                    <Brain className="h-4 w-4 mr-2" />
+                                    Analyze
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
 
