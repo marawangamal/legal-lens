@@ -324,33 +324,54 @@ export default function Home() {
 
     return (
       <Dialog open={showViewer} onOpenChange={closeViewer}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <File className="h-5 w-5" />
-              <span className="truncate">{currentFile.name}</span>
+        <DialogContent
+          className="custom-modal-width !max-w-[80vw] !w-[80vw] h-[95vh] p-0 gap-0"
+          style={{
+            maxWidth: '80vw',
+            width: '80vw',
+            height: '95vh',
+          }}
+        >
+          <DialogHeader className="px-6 py-4 border-b">
+            <DialogTitle className="flex items-center space-x-3 text-lg">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <File className="h-5 w-5 text-primary" />
+              </div>
+              <span className="truncate font-semibold">{currentFile.name}</span>
             </DialogTitle>
           </DialogHeader>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+          <div className="flex items-center justify-between px-6 py-3 bg-muted/30 border-b">
             <Button
               onClick={prevFile}
               disabled={selectedFileIndex === 0}
               variant="outline"
               size="sm"
+              className="min-w-[100px] h-9"
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
               Previous
             </Button>
-            <span className="text-sm text-muted-foreground">
-              {selectedFileIndex + 1} of {files.length}
-            </span>
+            <div className="flex items-center space-x-3">
+              <span className="text-sm font-medium text-muted-foreground">
+                {selectedFileIndex + 1} of {files.length}
+              </span>
+              <div className="w-16 h-1.5 bg-muted rounded-full">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-300"
+                  style={{
+                    width: `${((selectedFileIndex + 1) / files.length) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
             <Button
               onClick={nextFile}
               disabled={selectedFileIndex === files.length - 1}
               variant="outline"
               size="sm"
+              className="min-w-[100px] h-9"
             >
               Next
               <ChevronRight className="h-4 w-4 ml-2" />
@@ -358,94 +379,118 @@ export default function Home() {
           </div>
 
           {/* Keyboard shortcuts hint */}
-          <div className="px-4 py-2 bg-blue-50 text-blue-700 text-xs rounded-lg border border-blue-200">
-            💡 Use arrow keys to navigate, ESC to close
+          <div className="px-6 py-2 bg-blue-50 text-blue-700 text-xs border-b border-blue-200">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+              <span>💡 Use arrow keys to navigate, ESC to close</span>
+            </div>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+          <div className="flex-1 overflow-auto p-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 h-full">
               {/* File Display */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">File Preview</CardTitle>
+              <Card className="flex flex-col shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg flex items-center space-x-2">
+                    <Eye className="h-5 w-5 text-primary" />
+                    <span>File Preview</span>
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="h-[500px] overflow-auto">
-                  {currentFile.type.startsWith('image/') ? (
-                    <div className="flex justify-center h-full">
-                      <img
-                        src={fileUrl}
-                        alt={currentFile.name}
-                        className="max-w-full max-h-full object-contain rounded-lg"
-                      />
-                    </div>
-                  ) : currentFile.type.includes('pdf') ? (
-                    <div className="w-full h-full">
-                      <iframe
-                        src={fileUrl}
-                        className="w-full h-full min-h-[500px] rounded-lg border"
-                        title={currentFile.name}
-                      />
-                    </div>
-                  ) : currentFile.type.includes('text') ||
-                    currentFile.name.endsWith('.txt') ||
-                    currentFile.name.endsWith('.md') ? (
-                    <pre className="text-sm whitespace-pre-wrap font-mono bg-muted/50 p-4 rounded-lg h-full overflow-auto">
-                      {currentFile.content || 'No content available'}
-                    </pre>
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <div className="text-center">
-                        <File className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">
-                          Preview not available for this file type
-                        </p>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {currentFile.type}
-                        </p>
+                <CardContent className="flex-1 p-0">
+                  <div className="h-full p-4">
+                    {currentFile.type.startsWith('image/') ? (
+                      <div className="flex justify-center items-center h-full bg-muted/20 rounded-lg">
+                        <img
+                          src={fileUrl}
+                          alt={currentFile.name}
+                          className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                        />
                       </div>
-                    </div>
-                  )}
+                    ) : currentFile.type.includes('pdf') ? (
+                      <div className="w-full h-full bg-muted/20 rounded-lg overflow-hidden">
+                        <iframe
+                          src={`${fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
+                          className="w-full h-full rounded-lg border-0"
+                          title={currentFile.name}
+                          allowFullScreen
+                        />
+                      </div>
+                    ) : currentFile.type.includes('text') ||
+                      currentFile.name.endsWith('.txt') ||
+                      currentFile.name.endsWith('.md') ? (
+                      <div className="h-full bg-muted/20 rounded-lg overflow-hidden">
+                        <pre className="text-sm whitespace-pre-wrap font-mono p-4 h-full overflow-auto bg-background rounded-lg border shadow-sm">
+                          {currentFile.content || 'No content available'}
+                        </pre>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center h-full bg-muted/20 rounded-lg">
+                        <div className="text-center space-y-4">
+                          <div className="p-4 bg-muted rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                            <File className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                          <div className="space-y-2">
+                            <p className="text-muted-foreground font-medium">
+                              Preview not available
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {currentFile.type}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Analysis Panel */}
-              <Card>
-                <CardHeader>
+              <Card className="flex flex-col">
+                <CardHeader className="pb-4">
                   <CardTitle className="text-lg flex items-center space-x-2">
-                    <Brain className="h-5 w-5" />
+                    <div className="p-1.5 bg-green-100 rounded-lg">
+                      <Brain className="h-5 w-5 text-green-600" />
+                    </div>
                     <span>AI Analysis</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="flex-1 space-y-6 p-4 overflow-auto">
                   {canAnalyzeFile(currentFile) ? (
-                    <Button
-                      onClick={() => analyzeFile(selectedFileIndex)}
-                      disabled={isAnalyzing === selectedFileIndex}
-                      className="w-full"
-                      size="lg"
-                    >
-                      {isAnalyzing === selectedFileIndex ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                          Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          <Brain className="h-4 w-4 mr-2" />
-                          Analyze with AI
-                        </>
-                      )}
-                    </Button>
+                    <div className="space-y-4">
+                      <Button
+                        onClick={() => analyzeFile(selectedFileIndex)}
+                        disabled={isAnalyzing === selectedFileIndex}
+                        className="w-full h-12 text-base font-medium"
+                        size="lg"
+                      >
+                        {isAnalyzing === selectedFileIndex ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3" />
+                            Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            <Brain className="h-5 w-5 mr-3" />
+                            Analyze with AI
+                          </>
+                        )}
+                      </Button>
+                      <div className="text-sm text-muted-foreground text-center">
+                        Get detailed insights about your image content
+                      </div>
+                    </div>
                   ) : (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                      <div className="flex items-start space-x-2">
-                        <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
-                        <div>
-                          <p className="text-yellow-800 text-sm font-medium">
+                      <div className="flex items-start space-x-3">
+                        <div className="p-2 bg-yellow-100 rounded-lg">
+                          <AlertCircle className="h-5 w-5 text-yellow-600" />
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-yellow-800 font-medium text-sm">
                             Image Analysis Only
                           </p>
-                          <p className="text-yellow-700 text-sm mt-1">
+                          <p className="text-yellow-700 text-sm leading-relaxed">
                             This file type cannot be analyzed with the current
                             AI model. Only image files (JPG, PNG, GIF, WebP,
                             etc.) are supported.
@@ -457,12 +502,14 @@ export default function Home() {
 
                   {/* Analysis Results */}
                   {currentFile.analysis && (
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <h5 className="font-medium">Analysis Results</h5>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2 pb-2 border-b">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <h5 className="font-semibold text-lg">
+                          Analysis Results
+                        </h5>
                       </div>
-                      <div className="bg-muted/30 rounded-lg p-4 max-h-96 overflow-auto border">
+                      <div className="bg-muted/30 rounded-lg p-4 overflow-auto border shadow-sm max-h-[350px]">
                         {currentFile.analysis.analysis ? (
                           formatAnalysisResults(currentFile.analysis.analysis)
                         ) : (
