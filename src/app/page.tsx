@@ -1,6 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import {
+  formatFileSize,
+  formatDate,
+  getFileTypeIcon,
+  canViewFile,
+  canAnalyzeFile,
+} from '@/lib/utils';
 
 interface FileInfo {
   name: string;
@@ -9,6 +16,7 @@ interface FileInfo {
   lastModified: number;
   file?: File;
   content?: string;
+  analysis?: any;
 }
 
 interface DirectoryInputProps
@@ -23,6 +31,7 @@ export default function Home() {
   const [error, setError] = useState<string>('');
   const [selectedFileIndex, setSelectedFileIndex] = useState<number>(-1);
   const [showViewer, setShowViewer] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState<number | null>(null);
 
   // Keyboard navigation
   useEffect(() => {
@@ -98,25 +107,45 @@ export default function Home() {
     }
   };
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
+  const analyzeFile = async (fileIndex: number) => {
+    const file = files[fileIndex];
+    if (!file.file || !canAnalyzeFile(file)) {
+      setError('This file type cannot be analyzed.');
+      return;
+    }
 
-  const formatDate = (timestamp: number): string => {
-    return new Date(timestamp).toLocaleDateString();
-  };
+    setIsAnalyzing(fileIndex);
+    setError('');
 
-  const getFileTypeIcon = (type: string): string => {
-    if (type.startsWith('image/')) return '🖼️';
-    if (type.includes('pdf')) return '📄';
-    if (type.includes('word') || type.includes('document')) return '📝';
-    if (type.includes('excel') || type.includes('spreadsheet')) return '📊';
-    if (type.includes('text')) return '📄';
-    return '📁';
+    try {
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('file', file.file);
+
+      // Call our API
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Analysis failed');
+      }
+
+      // Update the file with analysis results
+      setFiles(prevFiles =>
+        prevFiles.map((f, index) =>
+          index === fileIndex ? { ...f, analysis: result } : f
+        )
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Analysis failed');
+      console.error('Analysis error:', err);
+    } finally {
+      setIsAnalyzing(null);
+    }
   };
 
   const openViewer = (index: number) => {
@@ -141,17 +170,6 @@ export default function Home() {
     }
   };
 
-  const canViewFile = (file: FileInfo): boolean => {
-    return (
-      file.type.startsWith('image/') ||
-      file.type.includes('pdf') ||
-      file.type.includes('text') ||
-      file.type.includes('document') ||
-      file.name.endsWith('.txt') ||
-      file.name.endsWith('.md')
-    );
-  };
-
   const renderFileViewer = () => {
     if (!showViewer || selectedFileIndex === -1 || !files[selectedFileIndex])
       return null;
@@ -163,7 +181,7 @@ export default function Home() {
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
+        <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
             <h3 className="text-lg font-semibold text-gray-900 truncate">
@@ -205,43 +223,92 @@ export default function Home() {
 
           {/* Content */}
           <div className="flex-1 overflow-auto p-4">
-            {currentFile.type.startsWith('image/') ? (
-              <div className="flex justify-center">
-                <img
-                  src={fileUrl}
-                  alt={currentFile.name}
-                  className="max-w-full max-h-full object-contain"
-                />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+              {/* File Display */}
+              <div className="bg-gray-100 rounded-lg p-4 overflow-auto">
+                {currentFile.type.startsWith('image/') ? (
+                  <div className="flex justify-center">
+                    <img
+                      src={fileUrl}
+                      alt={currentFile.name}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
+                ) : currentFile.type.includes('pdf') ? (
+                  <div className="w-full h-full">
+                    <iframe
+                      src={fileUrl}
+                      className="w-full h-full min-h-[500px]"
+                      title={currentFile.name}
+                    />
+                  </div>
+                ) : currentFile.type.includes('text') ||
+                  currentFile.name.endsWith('.txt') ||
+                  currentFile.name.endsWith('.md') ? (
+                  <pre className="text-sm whitespace-pre-wrap font-mono">
+                    {currentFile.content || 'No content available'}
+                  </pre>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <div className="text-6xl mb-4">📄</div>
+                      <p className="text-gray-600">
+                        Preview not available for this file type
+                      </p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        {currentFile.type}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
-            ) : currentFile.type.includes('pdf') ? (
-              <div className="w-full h-full">
-                <iframe
-                  src={fileUrl}
-                  className="w-full h-full min-h-[500px]"
-                  title={currentFile.name}
-                />
-              </div>
-            ) : currentFile.type.includes('text') ||
-              currentFile.name.endsWith('.txt') ||
-              currentFile.name.endsWith('.md') ? (
-              <div className="bg-gray-100 p-4 rounded h-full overflow-auto">
-                <pre className="text-sm whitespace-pre-wrap font-mono">
-                  {currentFile.content || 'No content available'}
-                </pre>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">📄</div>
-                  <p className="text-gray-600">
-                    Preview not available for this file type
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {currentFile.type}
-                  </p>
+
+              {/* Analysis Panel */}
+              <div className="bg-gray-50 rounded-lg p-4 overflow-auto">
+                <div className="mb-4">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                    AI Analysis
+                  </h4>
+                  {canAnalyzeFile(currentFile) ? (
+                    <div className="space-y-3">
+                      <button
+                        onClick={() => analyzeFile(selectedFileIndex)}
+                        disabled={isAnalyzing === selectedFileIndex}
+                        className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                      >
+                        {isAnalyzing === selectedFileIndex
+                          ? 'Analyzing...'
+                          : 'Analyze with AI'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                      <p className="text-yellow-800 text-sm">
+                        <strong>Image Analysis Only:</strong> This file type
+                        cannot be analyzed with the current AI model. Only image
+                        files (JPG, PNG, GIF, WebP, etc.) are supported for AI
+                        analysis.
+                      </p>
+                    </div>
+                  )}
                 </div>
+
+                {/* Analysis Results */}
+                {currentFile.analysis && (
+                  <div className="mt-4">
+                    <h5 className="font-medium text-gray-900 mb-2">
+                      Analysis Results:
+                    </h5>
+                    <div className="bg-white rounded border p-3 max-h-96 overflow-auto">
+                      <pre className="text-xs text-gray-800 whitespace-pre-wrap">
+                        {currentFile.analysis.analysis ||
+                          JSON.stringify(currentFile.analysis, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -254,7 +321,7 @@ export default function Home() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Legal Lens</h1>
           <p className="text-lg text-gray-600">
-            Upload a folder to count and display files
+            Upload a folder to count, display, and analyze files with AI
           </p>
         </div>
 
@@ -372,6 +439,11 @@ export default function Home() {
                               />
                             </div>
                           )}
+                          {file.analysis && (
+                            <span className="ml-2 text-green-500 text-xs">
+                              ✓ Analyzed
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -384,18 +456,27 @@ export default function Home() {
                         {formatDate(file.lastModified)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {canViewFile(file) ? (
-                          <button
-                            onClick={() => openViewer(index)}
-                            className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600 transition-colors"
-                          >
-                            View
-                          </button>
-                        ) : (
-                          <span className="text-gray-400 text-xs">
-                            No preview
-                          </span>
-                        )}
+                        <div className="flex space-x-2">
+                          {canViewFile(file) && (
+                            <button
+                              onClick={() => openViewer(index)}
+                              className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600 transition-colors"
+                            >
+                              View
+                            </button>
+                          )}
+                          {canAnalyzeFile(file) && (
+                            <button
+                              onClick={() => analyzeFile(index)}
+                              disabled={isAnalyzing === index}
+                              className="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                            >
+                              {isAnalyzing === index
+                                ? 'Analyzing...'
+                                : 'Analyze'}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

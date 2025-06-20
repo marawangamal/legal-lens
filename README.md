@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Legal Lens
 
-## Getting Started
+A Next.js application for uploading, viewing, and analyzing images using AI.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 📁 **Folder Upload**: Upload entire folders of files at once
+- 📊 **File Management**: View file details including name, type, size, and modification date
+- 👁️ **Document Viewer**: Built-in viewer for images, PDFs, and text files with navigation
+- 🤖 **AI Analysis**: Analyze images using a local LLM (Ollama) with vision capabilities
+- 🎨 **Modern UI**: Clean, responsive interface built with Tailwind CSS
+
+## Supported File Types
+
+### Viewing
+
+- Images (JPG, PNG, GIF, WebP, etc.)
+- PDFs
+- Text files (.txt, .md)
+
+### AI Analysis
+
+- **Images only**: JPG, PNG, GIF, WebP, BMP, TIFF, SVG
+
+## Prerequisites
+
+1. **Node.js** (v18.17.1 or higher)
+2. **Ollama** installed and running locally
+3. **Vision model** installed in Ollama (e.g., `qwen2.5vl`)
+
+## Setup
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone <repository-url>
+   cd legal-lens
+   ```
+
+2. **Install dependencies**:
+
+   ```bash
+   npm install
+   ```
+
+3. **Install and start Ollama**:
+
+   ```bash
+   # Install Ollama (follow instructions at https://ollama.ai)
+   # Pull a vision model
+   ollama pull qwen2.5vl
+   # Start Ollama
+   ollama serve
+   ```
+
+4. **Start the development server**:
+
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser** and navigate to `http://localhost:3000`
+
+## Usage
+
+1. **Upload Files**: Click "Click to select a folder" to upload a folder of files
+2. **View Files**: Click "View" to open the document viewer with navigation
+3. **Analyze Images**: Click "Analyze" on image files to get AI analysis
+4. **Navigate**: Use arrow keys or buttons to navigate between files in the viewer
+
+## API Endpoints
+
+### `/api/analyze`
+
+Analyzes images using the local Ollama LLM.
+
+**Method**: POST  
+**Content-Type**: multipart/form-data
+
+**Parameters**:
+
+- `file`: Image file to analyze
+
+**Response**:
+
+```json
+{
+  "analysis": "AI analysis of the image",
+  "fileName": "image.jpg",
+  "fileSize": 12345,
+  "fileType": "image/jpeg"
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The application is configured to connect to Ollama at `http://127.0.0.1:11434` using the `qwen2.5vl` model.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Development
 
-## Learn More
+- **Format on Save**: ESLint and Prettier are configured for automatic formatting
+- **TypeScript**: Full TypeScript support with strict type checking
+- **Tailwind CSS**: Utility-first CSS framework for styling
 
-To learn more about Next.js, take a look at the following resources:
+## Troubleshooting
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Connection Refused Error
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Ensure Ollama is running: `ollama serve`
+- Check that the model is installed: `ollama list`
+- Verify the API endpoint in the code matches your Ollama setup
 
-## Deploy on Vercel
+### Analysis Timeout
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- The analysis has a 30-second timeout
+- If it times out, try with a smaller image or restart Ollama
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Unsupported File Types
+
+- Only image files can be analyzed
+- PDFs and other files can still be viewed in the document viewer
+
+## License
+
+This project is licensed under the MIT License.
