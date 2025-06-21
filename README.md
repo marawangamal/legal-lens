@@ -1,6 +1,13 @@
-# Legal Lens
+# BRC Assistant
 
-Upload, view, and analyze documents with AI.
+A simple, elegant document analysis tool powered by AI.
+
+## Features
+
+- 📁 Upload multiple files (images, PDFs, text)
+- 👁️ View files in a clean interface
+- 🤖 AI-powered document analysis
+- 🎨 Modern, minimal UI
 
 ## Quick Start
 
@@ -14,7 +21,7 @@ Upload, view, and analyze documents with AI.
 
    ```bash
    ollama pull qwen2.5vl
-   OLLAMA_HOST=0.0.0.0:11434 ollama serve
+   OLLAMA_HOST=0.0.0.0:1234 ollama serve
    ```
 
 3. **Run the app**:
@@ -24,13 +31,6 @@ Upload, view, and analyze documents with AI.
    ```
 
 4. **Open** `http://localhost:3000`
-
-## Features
-
-- 📁 Upload folders of files
-- 👁️ View images, PDFs, and text files
-- 🤖 AI analysis of images using local LLM
-- 🎨 Modern, responsive interface
 
 ## Supported Files
 
@@ -50,4 +50,18 @@ Copy `env.example` to `.env` and adjust the Ollama URL if needed:
 cp env.example .env
 ```
 
-**Note**: If you're running Ollama on a different port or host, update `OLLAMA_BASE_URL` in the `.env` file.
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **UI**: Tailwind CSS, Radix UI
+- **AI**: Ollama with Qwen2.5-VL
+- **Validation**: Zod
+
+## Architecture
+
+The codebase is designed to be simple and maintainable:
+
+- **Single hook** for file management (`useFiles`)
+- **Consolidated types** in one file
+- **Minimal components** with focused responsibilities
+- **Clean API routes** with simplified error handling

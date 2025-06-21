@@ -1,12 +1,9 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { File, FileText, Image } from 'lucide-react';
-import { FileInfo } from '@/types/file';
+'use client';
+
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { File, Brain, CheckCircle } from 'lucide-react';
+import { FileInfo } from '@/types';
 import { formatFileSize } from '@/lib/utils';
 
 interface FileSummaryProps {
@@ -16,40 +13,45 @@ interface FileSummaryProps {
 export const FileSummary = ({ files }: FileSummaryProps) => {
   if (files.length === 0) return null;
 
+  const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+  const analyzedCount = files.filter(file => file.analysis).length;
+  const imageCount = files.filter(file =>
+    file.type.startsWith('image/')
+  ).length;
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>File Summary</CardTitle>
-        <CardDescription>
-          Overview of uploaded files and their statistics
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center space-y-2">
-            <div className="p-4 bg-primary/10 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-              <File className="h-8 w-8 text-primary" />
+      <CardContent className="p-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div className="space-y-1">
+            <div className="flex justify-center">
+              <File className="h-6 w-6 text-blue-600" />
             </div>
-            <div className="text-3xl font-bold">{files.length}</div>
-            <div className="text-muted-foreground">Total Files</div>
+            <p className="text-2xl font-bold">{files.length}</p>
+            <p className="text-sm text-muted-foreground">Total Files</p>
           </div>
-          <div className="text-center space-y-2">
-            <div className="p-4 bg-green-500/10 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-              <FileText className="h-8 w-8 text-green-600" />
+
+          <div className="space-y-1">
+            <div className="flex justify-center">
+              <Brain className="h-6 w-6 text-green-600" />
             </div>
-            <div className="text-3xl font-bold">
-              {formatFileSize(files.reduce((sum, file) => sum + file.size, 0))}
-            </div>
-            <div className="text-muted-foreground">Total Size</div>
+            <p className="text-2xl font-bold">{imageCount}</p>
+            <p className="text-sm text-muted-foreground">Images</p>
           </div>
-          <div className="text-center space-y-2">
-            <div className="p-4 bg-purple-500/10 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-              <Image className="h-8 w-8 text-purple-600" />
+
+          <div className="space-y-1">
+            <div className="flex justify-center">
+              <CheckCircle className="h-6 w-6 text-purple-600" />
             </div>
-            <div className="text-3xl font-bold">
-              {new Set(files.map(f => f.type)).size}
-            </div>
-            <div className="text-muted-foreground">File Types</div>
+            <p className="text-2xl font-bold">{analyzedCount}</p>
+            <p className="text-sm text-muted-foreground">Analyzed</p>
+          </div>
+
+          <div className="space-y-1">
+            <Badge variant="outline" className="text-lg px-3 py-1">
+              {formatFileSize(totalSize)}
+            </Badge>
+            <p className="text-sm text-muted-foreground">Total Size</p>
           </div>
         </div>
       </CardContent>

@@ -1,141 +1,88 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { config } from '@/lib/config';
+import { DocumentSchema } from '@/types';
+
+const flattenJson = (obj: any, prefix = ''): Record<string, any> => {
+  const flattened: Record<string, any> = {};
+
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      // Only include prefix if the key already exists in flattened
+      const newKey = flattened.hasOwnProperty(key) ? `${prefix}_${key}` : key;
+      if (
+        typeof obj[key] === 'object' &&
+        obj[key] !== null &&
+        !Array.isArray(obj[key])
+      ) {
+        // Recursively flatten nested objects
+        Object.assign(flattened, flattenJson(obj[key], newKey));
+      } else {
+        // Add primitive values or arrays directly
+        flattened[newKey] = obj[key];
+      }
+    }
+  }
+
+  return flattened;
+};
+
+const PROMPT =
+  "Parse personal information from this document. Also tell me what type of document this is under a 'document_type' attribute and the original document language under a 'document_language' attribute. Return your response as JSON.";
+
+// const PROMPT =
+//   "Tell me what type of document this is under a 'document_type' attribute. Return your response as JSON.";
 
 export async function POST(request: NextRequest) {
-  console.log('🚀 API route called - /api/analyze');
-
   try {
-    console.log('📝 Parsing form data...');
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
     if (!file) {
-      console.error('❌ No file provided');
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    console.log('📁 File received:', {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-    });
-
-    // Only allow image files
     if (!file.type.startsWith('image/')) {
-      console.error('❌ Invalid file type:', file.type);
       return NextResponse.json(
-        {
-          error: 'Only image files are supported for analysis.',
-          fileType: file.type,
-        },
+        { error: 'Only image files are supported' },
         { status: 400 }
       );
     }
 
-    // Convert file to base64 using Node.js Buffer
-    console.log('🔄 Converting file to base64...');
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64Data = buffer.toString('base64');
-    console.log('✅ Base64 conversion complete, length:', base64Data.length);
-
-    // Call local LLM API using the generate endpoint with timeout
-    console.log('🤖 Calling LLM API...');
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
-
+    const base64Data = Buffer.from(await file.arrayBuffer()).toString('base64');
     try {
-      const llmRequest = {
-        model: config.ollama.model,
-        prompt: `Parse all visible information. Structure your response as a JSON object.`,
-        images: [base64Data],
-        stream: false,
-      };
-
-      console.log('📤 Sending request to LLM:', {
-        model: llmRequest.model,
-        promptLength: llmRequest.prompt.length,
-        imageSize: base64Data.length,
-      });
-
-      const llmResponse = await fetch(`${config.ollama.baseUrl}/api/generate`, {
+      const response = await fetch(`${config.ollama.baseUrl}/api/generate`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(llmRequest),
-        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: config.ollama.model,
+          prompt: PROMPT,
+          images: [base64Data],
+          stream: false,
+          format: 'json',
+        }),
       });
 
-      clearTimeout(timeoutId);
-
-      if (!llmResponse.ok) {
-        const errorText = await llmResponse.text();
-        console.error('❌ LLM API error:', {
-          status: llmResponse.status,
-          statusText: llmResponse.statusText,
-          error: errorText,
-        });
-        throw new Error(
-          `LLM API error: ${llmResponse.status} ${llmResponse.statusText} - ${errorText}`
-        );
+      if (!response.ok) {
+        throw new Error(`LLM API error: ${response.status}`);
       }
 
-      console.log('✅ LLM response received');
-      const result = await llmResponse.json();
+      const result = await response.json();
+      const parsed = JSON.parse(result.response);
+      // Flatten json to single level
+      const flattened = flattenJson(parsed);
+      const validatedResponse = DocumentSchema.parse(flattened);
+      console.log(flattened);
 
-      console.log('📄 Raw LLM response:', {
-        responseLength: result.response?.length || 0,
-        responsePreview: result.response?.substring(0, 200) + '...',
-      });
-
-      // Try to parse the response as JSON
-      let parsedAnalysis;
-      try {
-        console.log('🔍 Attempting to parse as JSON...');
-
-        // Handle markdown code blocks
-        let responseText = result.response;
-
-        // Handle markdown:
-        if (responseText.includes('```json')) {
-          console.log('📊 Detected JSON code block format');
-          responseText = responseText
-            .replace(/```json\n?/g, '')
-            .replace(/```\n?/g, '');
-          console.log('📊 Response text:', responseText);
-        }
-
-        parsedAnalysis = JSON.parse(responseText);
-        console.log('✅ Successfully parsed as JSON:', parsedAnalysis);
-      } catch (parseError) {
-        // If parsing fails, check if it's a markdown table and convert it
-        console.warn('⚠️ Failed to parse LLM response as JSON:', parseError);
-        parsedAnalysis = {
-          failed: true,
-        };
+      return NextResponse.json(validatedResponse);
+    } catch (fetchError) {
+      // clearTimeout(timeoutId);
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        throw new Error('Request timed out after 45 seconds');
       }
-      console.log('📤 Sending response:', {
-        analysisKeys: Object.keys(parsedAnalysis),
-        keyFieldsCount: Object.keys(parsedAnalysis.keyFields || {}).length,
-      });
-      return NextResponse.json(parsedAnalysis);
-    } catch (error) {
-      clearTimeout(timeoutId);
-      if (error instanceof Error && error.name === 'AbortError') {
-        console.error('⏰ Analysis timed out');
-        throw new Error(
-          'Analysis timed out after 60 seconds. Please try again.'
-        );
-      }
-      console.error('❌ Error during LLM call:', error);
-      throw error;
+      throw fetchError;
     }
   } catch (error) {
-    console.error('💥 Analysis error:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Analysis failed' },
-      { status: 500 }
-    );
+    console.error('Analysis error:', error);
+    return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }
