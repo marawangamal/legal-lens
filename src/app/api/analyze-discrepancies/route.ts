@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { config } from '@/lib/config';
 
 export async function POST(request: NextRequest) {
-  console.log('🚀 API: /api/analyze-discrepancies');
-
   try {
     const { documents } = await request.json();
 
@@ -14,7 +12,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const prompt = `Look at these documents and tell me if you see any discrepancies between them. Just respond with "yes" or "no":
+    const prompt = `Analyze these documents for discrepancies. Respond with "yes" or "no":
 
 ${JSON.stringify(documents, null, 2)}`;
 
@@ -28,7 +26,9 @@ ${JSON.stringify(documents, null, 2)}`;
       }),
     });
 
-    if (!response.ok) throw new Error(`LLM API error: ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`LLM API error: ${response.status}`);
+    }
 
     const result = await response.json();
     const hasDiscrepancies = result.response.toLowerCase().includes('yes');
@@ -38,15 +38,8 @@ ${JSON.stringify(documents, null, 2)}`;
       response: result.response,
     });
   } catch (error) {
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Discrepancy analysis failed',
-      },
-      { status: 500 }
-    );
+    console.error('Discrepancy analysis error:', error);
+    return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }
 
