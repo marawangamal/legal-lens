@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { config } from '@/lib/config';
+import { z } from 'zod';
+
+const DiscrepancySchema = z.object({
+  hasDiscrepancies: z.boolean(),
+  summary: z.string(),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +18,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const prompt = `Analyze these documents for discrepancies. Respond with "yes" or "no":
+    const prompt = `Analyze these documents for discrepancies. Return a JSON response with hasDiscrepancies (boolean) and summary (string):
 
 ${JSON.stringify(documents, null, 2)}`;
 
@@ -23,6 +29,7 @@ ${JSON.stringify(documents, null, 2)}`;
         model: config.ollama.model,
         prompt,
         stream: false,
+        format: 'json',
       }),
     });
 
@@ -31,55 +38,12 @@ ${JSON.stringify(documents, null, 2)}`;
     }
 
     const result = await response.json();
-    const hasDiscrepancies = result.response.toLowerCase().includes('yes');
+    const parsed = JSON.parse(result.response);
+    const validatedResponse = DiscrepancySchema.parse(parsed);
 
-    return NextResponse.json({
-      hasDiscrepancies,
-      response: result.response,
-    });
+    return NextResponse.json(validatedResponse);
   } catch (error) {
     console.error('Discrepancy analysis error:', error);
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }
-
-// // Create a comprehensive prompt for discrepancy analysis
-// const discrepancyPrompt = `Analyze the following documents and identify any discrepancies, inconsistencies, or contradictions between them.
-
-// Documents to analyze:
-// ${documentSummaries
-//   .map(doc =>
-//     doc
-//       ? `
-// Document ${doc.id}: ${doc.name} (${doc.type})
-// Summary: ${doc.summary}
-// Key Fields: ${JSON.stringify(doc.keyFields, null, 2)}
-// `
-//       : ''
-//   )
-//   .join('\n')}
-
-// Please provide your analysis in the following JSON format:
-// {
-//   "discrepancies": [
-//     {
-//       "type": "contradiction|inconsistency|missing_info|format_mismatch",
-//       "description": "Detailed description of the discrepancy",
-//       "documents_involved": ["Document 1", "Document 2"],
-//       "severity": "high|medium|low",
-//       "field": "specific field name if applicable"
-//     }
-//   ],
-//   "summary": "Overall assessment of document consistency",
-//   "confidence": "high|medium|low",
-//   "recommendations": [
-//     "Specific recommendation for resolving discrepancies"
-//   ]
-// }
-
-// Focus on:
-// - Contradictory information between documents
-// - Missing information in some documents
-// - Inconsistent formatting or standards
-// - Data quality issues
-// - Potential fraud indicators`;

@@ -27,5 +27,11 @@ export interface AnalysisResponse {
 
 export interface DiscrepancyResponse {
   hasDiscrepancies: boolean;
-  response: string;
+  summary: string;
+}
+
+export interface DiscrepancyCheck {
+  hasDiscrepancies: boolean;
+  summary: string;
+  isChecking: boolean;
 }

@@ -8,6 +8,7 @@ import {
   FileList,
   FileViewer,
   ErrorDisplay,
+  DiscrepancyChecker,
 } from '@/components';
 
 export default function Home() {
@@ -15,9 +16,11 @@ export default function Home() {
     files,
     selectedIndex,
     isAnalyzing,
+    discrepancyCheck,
     error,
     uploadFiles,
     analyzeFile,
+    checkDiscrepancies,
     selectFile,
     nextFile,
     prevFile,
@@ -26,6 +29,7 @@ export default function Home() {
   } = useFiles();
 
   const selectedFile = selectedIndex >= 0 ? files[selectedIndex] : null;
+  const analyzedFilesCount = files.filter(file => file.analysis).length;
 
   return (
     <div className="min-h-screen bg-background py-8 px-4">
@@ -58,6 +62,14 @@ export default function Home() {
           isAnalyzing={isAnalyzing}
           onView={selectFile}
           onAnalyze={analyzeFile}
+        />
+
+        {/* Discrepancy Checker */}
+        <DiscrepancyChecker
+          discrepancyCheck={discrepancyCheck}
+          onCheckDiscrepancies={checkDiscrepancies}
+          analyzedFilesCount={analyzedFilesCount}
+          totalFilesCount={files.length}
         />
       </div>
 
