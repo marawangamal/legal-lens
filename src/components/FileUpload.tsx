@@ -10,6 +10,12 @@ interface FileUploadProps {
   isLoading?: boolean;
 }
 
+interface DirectoryInputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  webkitdirectory?: string;
+  directory?: string;
+}
+
 export const FileUpload = ({ onUpload, isLoading }: FileUploadProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -37,7 +43,7 @@ export const FileUpload = ({ onUpload, isLoading }: FileUploadProps) => {
           <div className="space-y-2">
             <h3 className="text-lg font-semibold">Upload Files</h3>
             <p className="text-sm text-muted-foreground">
-              Select files to analyze with AI
+              Select files or a folder to analyze with AI
             </p>
           </div>
 
@@ -47,16 +53,19 @@ export const FileUpload = ({ onUpload, isLoading }: FileUploadProps) => {
             className="w-full max-w-xs"
           >
             <Folder className="h-4 w-4 mr-2" />
-            {isLoading ? 'Processing...' : 'Choose Files'}
+            {isLoading ? 'Processing...' : 'Choose Files or Folder'}
           </Button>
 
           <input
             ref={inputRef}
             type="file"
             multiple
+            webkitdirectory=""
+            directory=""
             onChange={handleFileSelect}
             className="hidden"
             accept="image/*,.pdf,.txt,.md"
+            {...({} as DirectoryInputProps)}
           />
         </div>
       </CardContent>
