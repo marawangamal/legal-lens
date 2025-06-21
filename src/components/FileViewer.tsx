@@ -118,18 +118,18 @@ export const FileViewer = ({
         {/* ─────────────────────────────────────────────────────────── */}
 
         {/* ── MAIN CONTENT ─────────────────────────────────────────── */}
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-hidden p-4">
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 h-full">
             {/* File preview panel */}
-            <Card className="flex flex-col">
-              <CardHeader className="pb-2">
+            <Card className="flex flex-col overflow-hidden">
+              <CardHeader className="pb-2 flex-shrink-0">
                 <CardTitle className="text-sm flex items-center space-x-2">
                   <Eye className="h-4 w-4 text-primary" />
                   <span>Preview</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 p-0">
-                <div className="h-full p-2">
+              <CardContent className="flex-1 p-0 overflow-hidden">
+                <div className="h-full p-2 overflow-auto">
                   {currentFile.type.startsWith('image/') ? (
                     <div className="flex justify-center items-center h-full bg-muted/10 rounded border">
                       <img
@@ -173,8 +173,8 @@ export const FileViewer = ({
             </Card>
 
             {/* AI analysis panel */}
-            <Card className="flex flex-col">
-              <CardHeader className="pb-2">
+            <Card className="flex flex-col overflow-hidden">
+              <CardHeader className="pb-2 flex-shrink-0">
                 <CardTitle className="text-sm flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Brain className="h-4 w-4 text-green-600" />
@@ -202,37 +202,41 @@ export const FileViewer = ({
                   )}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 space-y-3 p-2 overflow-auto">
-                {!canAnalyzeFile(currentFile) && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded p-2">
-                    <div className="flex items-start space-x-2">
-                      <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
-                      <div>
-                        <p className="text-yellow-800 text-xs font-medium">
-                          Image Analysis Only
-                        </p>
-                        <p className="text-yellow-700 text-xs mt-1">
-                          Only image files are supported for AI analysis.
-                        </p>
+              <CardContent className="flex-1 p-2 overflow-hidden">
+                <div className="h-full overflow-auto space-y-3">
+                  {!canAnalyzeFile(currentFile) && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded p-2">
+                      <div className="flex items-start space-x-2">
+                        <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                        <div>
+                          <p className="text-yellow-800 text-xs font-medium">
+                            Image Analysis Only
+                          </p>
+                          <p className="text-yellow-700 text-xs mt-1">
+                            Only image files are supported for AI analysis.
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Analysis results */}
-                {currentFile.analysis && (
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-2 pb-2 border-b">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <h5 className="font-medium text-sm">Analysis Results</h5>
-                    </div>
-                    <div className="bg-background rounded border overflow-hidden">
-                      <div className="p-3">
-                        {formatAnalysisResults(currentFile.analysis)}
+                  {/* Analysis results */}
+                  {currentFile.analysis && (
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2 pb-2 border-b">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <h5 className="font-medium text-sm">
+                          Analysis Results
+                        </h5>
+                      </div>
+                      <div className="bg-background rounded border overflow-hidden">
+                        <div className="p-3">
+                          {formatAnalysisResults(currentFile.analysis)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
