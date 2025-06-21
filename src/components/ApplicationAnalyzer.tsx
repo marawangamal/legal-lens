@@ -6,19 +6,19 @@ import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, CheckCircle, Search, Loader2 } from 'lucide-react';
 import { DiscrepancyCheck } from '@/types';
 
-interface DiscrepancyCheckerProps {
+interface ApplicationAnalyzerProps {
   discrepancyCheck: DiscrepancyCheck;
   onCheckDiscrepancies: () => void;
   analyzedFilesCount: number;
   totalFilesCount: number;
 }
 
-export const DiscrepancyChecker = ({
+export const ApplicationAnalyzer = ({
   discrepancyCheck,
   onCheckDiscrepancies,
   analyzedFilesCount,
   totalFilesCount,
-}: DiscrepancyCheckerProps) => {
+}: ApplicationAnalyzerProps) => {
   if (totalFilesCount === 0) return null;
 
   const canCheck = analyzedFilesCount >= 2;
@@ -28,7 +28,7 @@ export const DiscrepancyChecker = ({
       <CardHeader>
         <CardTitle className="text-lg flex items-center space-x-2">
           <Search className="h-5 w-5" />
-          <span>Discrepancy Checker</span>
+          <span>Application Analyzer</span>
           {discrepancyCheck.hasDiscrepancies && (
             <Badge variant="destructive" className="ml-2">
               <AlertTriangle className="h-3 w-3 mr-1" />
@@ -36,7 +36,10 @@ export const DiscrepancyChecker = ({
             </Badge>
           )}
           {!discrepancyCheck.hasDiscrepancies && discrepancyCheck.summary && (
-            <Badge variant="secondary" className="ml-2">
+            <Badge
+              variant="default"
+              className="ml-2 bg-green-100 text-green-800 border-green-200"
+            >
               <CheckCircle className="h-3 w-3 mr-1" />
               No Discrepancies
             </Badge>

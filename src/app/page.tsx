@@ -8,7 +8,7 @@ import {
   FileList,
   FileViewer,
   ErrorDisplay,
-  DiscrepancyChecker,
+  ApplicationAnalyzer,
 } from '@/components';
 
 export default function Home() {
@@ -65,7 +65,7 @@ export default function Home() {
         />
 
         {/* Discrepancy Checker */}
-        <DiscrepancyChecker
+        <ApplicationAnalyzer
           discrepancyCheck={discrepancyCheck}
           onCheckDiscrepancies={checkDiscrepancies}
           analyzedFilesCount={analyzedFilesCount}

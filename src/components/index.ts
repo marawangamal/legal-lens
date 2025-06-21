@@ -1,6 +1,6 @@
-export { FileUpload } from './FileUpload';
+export { ErrorDisplay } from './ErrorDisplay';
+export { ApplicationAnalyzer } from './ApplicationAnalyzer';
 export { FileList } from './FileList';
+export { FileUpload } from './FileUpload';
 export { FileViewer } from './FileViewer';
 export { FileSummary } from './FileSummary';
-export { ErrorDisplay } from './ErrorDisplay';
-export { DiscrepancyChecker } from './DiscrepancyChecker';

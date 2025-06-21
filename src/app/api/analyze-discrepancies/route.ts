@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const prompt = `Analyze these documents for discrepancies. Return a JSON response with hasDiscrepancies (boolean) and summary (string):
+    const prompt = `Here is a list of documents that will be used in an immigration application to canada. Check for any pottential discrepancies/issues with these documents. Return a JSON response with hasDiscrepancies (boolean) and summary (string):
 
 ${JSON.stringify(documents, null, 2)}`;
 
