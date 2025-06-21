@@ -27,7 +27,7 @@ const flattenJson = (obj: any, prefix = ''): Record<string, any> => {
 };
 
 const PROMPT =
-  "Parse personal information from this document. Also tell me what type of document this is under a 'document_type' attribute. Return your response as JSON.";
+  "Parse personal information from this document. Also tell me what type of document this is under a 'document_type' attribute and the original document language under a 'document_language' attribute. Return your response as JSON.";
 
 // const PROMPT =
 //   "Tell me what type of document this is under a 'document_type' attribute. Return your response as JSON.";
