@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Legal Lens - File Counter',
-  description: 'Upload a folder to count and display files',
+  title: 'BRC Assistant - Document Analysis',
+  description: 'Upload and analyze documents with AI-powered insights',
 };
 
 export default function RootLayout({

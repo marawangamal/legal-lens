@@ -40,7 +40,7 @@ export default function Home() {
             <div className="p-3 bg-primary/10 rounded-full">
               <FileText className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-4xl font-bold tracking-tight">Legal Lens</h1>
+            <h1 className="text-4xl font-bold tracking-tight">BRC Assistant</h1>
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Upload and analyze documents with AI-powered insights

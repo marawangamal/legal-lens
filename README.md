@@ -1,4 +1,4 @@
-# Legal Lens
+# BRC Assistant
 
 A simple, elegant document analysis tool powered by AI.
 
