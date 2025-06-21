@@ -175,32 +175,35 @@ export const FileViewer = ({
             {/* AI analysis panel */}
             <Card className="flex flex-col">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center space-x-2">
-                  <Brain className="h-4 w-4 text-green-600" />
-                  <span>AI Analysis</span>
+                <CardTitle className="text-sm flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Brain className="h-4 w-4 text-green-600" />
+                    <span>AI Analysis</span>
+                  </div>
+                  {canAnalyzeFile(currentFile) && (
+                    <Button
+                      onClick={() => onAnalyze(selectedFileIndex)}
+                      disabled={isAnalyzing === selectedFileIndex}
+                      className="h-7 text-xs"
+                      size="sm"
+                    >
+                      {isAnalyzing === selectedFileIndex ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Brain className="h-3 w-3 mr-1" />
+                          Analyze
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex-1 space-y-3 p-2 overflow-auto">
-                {canAnalyzeFile(currentFile) ? (
-                  <Button
-                    onClick={() => onAnalyze(selectedFileIndex)}
-                    disabled={isAnalyzing === selectedFileIndex}
-                    className="w-full h-9 text-sm"
-                    size="sm"
-                  >
-                    {isAnalyzing === selectedFileIndex ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Brain className="h-4 w-4 mr-2" />
-                        Analyze
-                      </>
-                    )}
-                  </Button>
-                ) : (
+                {!canAnalyzeFile(currentFile) && (
                   <div className="bg-yellow-50 border border-yellow-200 rounded p-2">
                     <div className="flex items-start space-x-2">
                       <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
