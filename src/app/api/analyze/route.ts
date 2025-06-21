@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     try {
       const llmRequest = {
         model: config.ollama.model,
-        prompt: `Parse all visible information. Structure your response as a JSON object.`,
+        prompt: `Parse all visible information from this client's document it could be an identity document or some govermental form. Structure your response as a JSON object. Also add a document_type field to the response.`,
         images: [base64Data],
         stream: false,
       };

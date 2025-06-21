@@ -9,6 +9,7 @@ import {
   FileList,
   FileViewer,
   ErrorDisplay,
+  DiscrepancyAnalysis,
 } from '@/components';
 
 export default function Home() {
@@ -63,6 +64,9 @@ export default function Home() {
           onViewFile={openViewer}
           onAnalyzeFile={analyzeFile}
         />
+
+        {/* Discrepancy Analysis */}
+        {files.length > 0 && <DiscrepancyAnalysis files={files} />}
       </div>
 
       {/* Document Viewer Modal */}
