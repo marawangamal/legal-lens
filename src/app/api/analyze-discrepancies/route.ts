@@ -22,26 +22,41 @@ export async function POST(request: NextRequest) {
 
 ${JSON.stringify(documents, null, 2)}`;
 
-    const response = await fetch(`${config.ollama.baseUrl}/api/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: config.ollama.model,
-        prompt,
-        stream: false,
-        format: 'json',
-      }),
-    });
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 seconds
 
-    if (!response.ok) {
-      throw new Error(`LLM API error: ${response.status}`);
+    try {
+      const response = await fetch(`${config.ollama.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: config.ollama.model,
+          prompt,
+          stream: false,
+          format: 'json',
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`LLM API error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      const parsed = JSON.parse(result.response);
+      const validatedResponse = DiscrepancySchema.parse(parsed);
+
+      return NextResponse.json(validatedResponse);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        throw new Error('Request timed out after 45 seconds');
+      }
+      throw fetchError;
     }
-
-    const result = await response.json();
-    const parsed = JSON.parse(result.response);
-    const validatedResponse = DiscrepancySchema.parse(parsed);
-
-    return NextResponse.json(validatedResponse);
   } catch (error) {
     console.error('Discrepancy analysis error:', error);
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
