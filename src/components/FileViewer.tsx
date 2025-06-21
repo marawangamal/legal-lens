@@ -139,12 +139,15 @@ export const FileViewer = ({
                       />
                     </div>
                   ) : currentFile.type.includes('pdf') ? (
-                    <div className="w-full h-full bg-muted/10 rounded border overflow-hidden">
+                    <div className="w-full h-full bg-muted/10 rounded border overflow-hidden relative">
                       <iframe
-                        src={`${fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
+                        src={`${fileUrl}#toolbar=1&navpanes=0&scrollbar=1&view=FitH&zoom=100`}
                         className="w-full h-full border-0"
                         title={currentFile.name}
                         allowFullScreen
+                        onError={e => {
+                          console.error('PDF loading error:', e);
+                        }}
                       />
                     </div>
                   ) : currentFile.type.includes('text') ||
