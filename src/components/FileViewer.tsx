@@ -49,7 +49,7 @@ export const FileViewer = ({
 
   return (
     <Dialog open={show} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh] p-0">
+      <DialogContent className="!w-[80vw] !max-w-[80vw] !h-[85vh] !max-h-[85vh] p-0 flex flex-col">
         <DialogHeader className="flex items-center justify-between p-4 border-b">
           <DialogTitle className="flex items-center space-x-2">
             <File className="h-4 w-4" />
@@ -81,17 +81,17 @@ export const FileViewer = ({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 p-4 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+        <div className="flex-1 p-4 overflow-hidden min-h-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full min-h-0">
             {/* File Preview */}
-            <Card className="flex flex-col">
+            <Card className="flex flex-col h-full min-h-0">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center space-x-2">
                   <Eye className="h-4 w-4" />
                   <span>Preview</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 p-0">
+              <CardContent className="flex-1 min-h-0 overflow-auto">
                 <div className="h-full p-2">
                   {file.type.startsWith('image/') ? (
                     <img
@@ -120,7 +120,7 @@ export const FileViewer = ({
             </Card>
 
             {/* Analysis */}
-            <Card className="flex flex-col">
+            <Card className="flex flex-col h-full min-h-0">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -142,7 +142,7 @@ export const FileViewer = ({
                   )}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-1">
+              <CardContent className="flex-1 min-h-0 overflow-auto">
                 {file.analysis ? (
                   <div className="space-y-2">
                     <div className="p-2 bg-muted/20 rounded">
