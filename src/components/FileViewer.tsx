@@ -46,24 +46,29 @@ export const FileViewer = ({
   onPrev,
   onAnalyze,
 }: FileViewerProps) => {
-  if (!showViewer || selectedFileIndex === -1 || !files[selectedFileIndex])
-    return null;
-
   const currentFile = files[selectedFileIndex];
-  const fileUrl = currentFile.file ? URL.createObjectURL(currentFile.file) : '';
+  const fileUrl = currentFile?.file
+    ? URL.createObjectURL(currentFile.file)
+    : '';
 
   // Revoke object URL when component unmounts or file changes
   useEffect(() => {
     return () => {
-      if (currentFile.file) URL.revokeObjectURL(fileUrl);
+      if (currentFile?.file) URL.revokeObjectURL(fileUrl);
     };
-  }, [fileUrl, currentFile.file]);
+  }, [fileUrl, currentFile?.file]);
+
+  if (!showViewer || selectedFileIndex === -1 || !files[selectedFileIndex])
+    return null;
 
   return (
     <Dialog open={showViewer} onOpenChange={onClose}>
-      <DialogContent className="!max-w-[80vw] !w-[80vw] h-[95vh] p-0 flex flex-col">
+      <DialogContent
+        className="!max-w-[80vw] !w-[80vw] h-[95vh] p-0 flex flex-col"
+        showCloseButton={false}
+      >
         {/* ── TITLE • NAV • CLOSE ─────────────────────────────────── */}
-        <DialogHeader asChild>
+        <DialogHeader>
           <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/20">
             {/* File name */}
             <DialogTitle asChild>
