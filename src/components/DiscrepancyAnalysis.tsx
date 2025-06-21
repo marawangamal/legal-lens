@@ -12,25 +12,20 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { FileInfo } from '@/types/file';
+import { DiscrepancyAnalysisType } from '@/types/schemas';
 
 interface DiscrepancyAnalysisProps {
   files: FileInfo[];
 }
 
 interface Discrepancy {
-  type: string;
+  type: 'contradiction' | 'inconsistency' | 'missing_info' | 'format_mismatch';
   description: string;
-  documents_involved: string[];
+  documents: string[];
   severity: 'high' | 'medium' | 'low';
-  field?: string;
 }
 
-interface DiscrepancyResult {
-  discrepancies: Discrepancy[];
-  summary: string;
-  confidence: 'high' | 'medium' | 'low';
-  recommendations: string[];
-}
+interface DiscrepancyResult extends DiscrepancyAnalysisType {}
 
 export const DiscrepancyAnalysis = ({ files }: DiscrepancyAnalysisProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -205,11 +200,6 @@ export const DiscrepancyAnalysis = ({ files }: DiscrepancyAnalysisProps) => {
                           <Badge variant="outline" className="text-xs">
                             {discrepancy.severity}
                           </Badge>
-                          {discrepancy.field && (
-                            <Badge variant="outline" className="text-xs">
-                              {discrepancy.field}
-                            </Badge>
-                          )}
                         </div>
                         <p className="text-sm mb-2">
                           {discrepancy.description}
@@ -218,7 +208,7 @@ export const DiscrepancyAnalysis = ({ files }: DiscrepancyAnalysisProps) => {
                           <span className="font-medium">
                             Documents involved:
                           </span>{' '}
-                          {discrepancy.documents_involved.join(', ')}
+                          {discrepancy.documents.join(', ')}
                         </div>
                       </div>
                     </div>

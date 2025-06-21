@@ -74,7 +74,7 @@ export const FileList = ({
                         <div className="font-medium truncate max-w-xs">
                           {file.name}
                         </div>
-                        {file.analysis && (
+                        {file.analysis && file.analysis.keyFields && (
                           <Badge variant="secondary" className="text-xs">
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Analyzed

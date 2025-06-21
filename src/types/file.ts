@@ -1,3 +1,5 @@
+import { PDocumentType } from './schemas';
+
 export interface FileInfo {
   name: string;
   size: number;
@@ -5,7 +7,10 @@ export interface FileInfo {
   lastModified: number;
   file?: File;
   content?: string;
-  analysis?: any;
+  analysis?: {
+    documentType?: string;
+    keyFields: PDocumentType;
+  };
 }
 
 export interface DirectoryInputProps
