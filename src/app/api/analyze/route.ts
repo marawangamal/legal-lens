@@ -1,49 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Helper function to parse markdown table and convert to JSON
-function parseMarkdownTableToJson(markdownText: string) {
-  console.log(
-    '🔍 Parsing markdown table:',
-    markdownText.substring(0, 200) + '...'
-  );
-
-  const lines = markdownText.split('\n').filter(line => line.trim());
-  const keyFields: Record<string, string> = {};
-
-  // Skip header and separator lines
-  const dataLines = lines.filter(
-    line =>
-      line.includes('|') &&
-      !line.match(/^[\s\-\|:]+$/) &&
-      !line.toLowerCase().includes('field') &&
-      !line.toLowerCase().includes('value')
-  );
-
-  console.log('📊 Found data lines:', dataLines.length);
-
-  dataLines.forEach((line, index) => {
-    const cells = line.split('|').filter(cell => cell.trim());
-    if (cells.length >= 2) {
-      const key = cells[0].trim();
-      const value = cells[1].trim();
-      if (key && value) {
-        keyFields[key] = value;
-        console.log(`  ${index + 1}. ${key}: ${value}`);
-      }
-    }
-  });
-
-  const result = {
-    documentType: 'Document',
-    extractedText: markdownText,
-    keyFields,
-    summary: `Extracted ${Object.keys(keyFields).length} fields from document`,
-    confidence: 'medium',
-  };
-
-  console.log('✅ Parsed result:', result);
-  return result;
-}
+import { config } from '@/lib/config';
 
 export async function POST(request: NextRequest) {
   console.log('🚀 API route called - /api/analyze');
@@ -90,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     try {
       const llmRequest = {
-        model: 'qwen2.5vl',
+        model: config.ollama.model,
         prompt: `Parse all visible information. Structure your response as a JSON object.`,
         images: [base64Data],
         stream: false,
@@ -102,7 +58,7 @@ export async function POST(request: NextRequest) {
         imageSize: base64Data.length,
       });
 
-      const llmResponse = await fetch('http://127.0.0.1:11434/api/generate', {
+      const llmResponse = await fetch(`${config.ollama.baseUrl}/api/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
