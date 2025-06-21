@@ -10,7 +10,8 @@
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "format:fix": "prettier --write . && next lint --fix"
+    "format:fix": "prettier --write . && next lint --fix",
+    "debug": "node debug-api.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",

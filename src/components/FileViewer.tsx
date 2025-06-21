@@ -221,19 +221,15 @@ export const FileViewer = ({
 
                 {/* Analysis results */}
                 {currentFile.analysis && (
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2 pb-1 border-b">
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2 pb-2 border-b">
                       <CheckCircle className="h-4 w-4 text-green-600" />
-                      <h5 className="font-medium text-sm">Results</h5>
+                      <h5 className="font-medium text-sm">Analysis Results</h5>
                     </div>
-                    <div className="bg-muted/20 rounded p-2 overflow-auto border text-xs max-h-[300px]">
-                      {currentFile.analysis.analysis ? (
-                        formatAnalysisResults(currentFile.analysis.analysis)
-                      ) : (
-                        <pre className="text-xs text-muted-foreground whitespace-pre-wrap">
-                          {JSON.stringify(currentFile.analysis, null, 2)}
-                        </pre>
-                      )}
+                    <div className="bg-background rounded border overflow-hidden">
+                      <div className="p-3">
+                        {formatAnalysisResults(currentFile.analysis)}
+                      </div>
                     </div>
                   </div>
                 )}
