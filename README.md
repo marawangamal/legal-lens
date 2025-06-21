@@ -14,7 +14,7 @@ Upload, view, and analyze documents with AI.
 
    ```bash
    ollama pull qwen2.5vl
-   OLLAMA_HOST=0.0.0.0:11434 ollama serve
+   OLLAMA_HOST=0.0.0.0:1234 ollama serve
    ```
 
 3. **Run the app**:
