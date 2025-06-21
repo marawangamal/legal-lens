@@ -4,10 +4,6 @@ import { z } from 'zod';
 export const DocumentSchema = z
   .object({
     document_type: z.string(),
-    issuer: z.string().optional(),
-    issue_date: z.string().optional(),
-    card_usage: z.string().optional(),
-    card_usage_details: z.string().optional(),
   })
   .passthrough();
 

@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: config.ollama.model,
-        prompt: `Parse all visible information from this document. Return as JSON with document_type field.`,
+        prompt: `Extract all visible information for my clientfrom this document. Only include relevant information. This could be an id card or a government document. Return as JSON with document_type field.`,
         images: [base64Data],
         stream: false,
         format: 'json',
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
     const result = await response.json();
     const parsed = JSON.parse(result.response);
     const validatedResponse = DocumentSchema.parse(parsed);
+    console.log(validatedResponse);
 
     return NextResponse.json(validatedResponse);
   } catch (error) {
