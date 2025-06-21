@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     try {
       const llmRequest = {
         model: 'qwen2.5vl',
-        prompt: `Parse all visible information. You MUST respond with ONLY a valid JSON object. Do not include any markdown, text formatting, or additional explanations.`,
+        prompt: `Parse all visible information. Structure your response as a JSON object.`,
         images: [base64Data],
         stream: false,
       };
@@ -137,7 +137,20 @@ export async function POST(request: NextRequest) {
       let parsedAnalysis;
       try {
         console.log('🔍 Attempting to parse as JSON...');
-        parsedAnalysis = JSON.parse(result.response);
+
+        // Handle markdown code blocks
+        let responseText = result.response;
+
+        // Handle markdown:
+        if (responseText.includes('```json')) {
+          console.log('📊 Detected JSON code block format');
+          responseText = responseText
+            .replace(/```json\n?/g, '')
+            .replace(/```\n?/g, '');
+          console.log('📊 Response text:', responseText);
+        }
+
+        parsedAnalysis = JSON.parse(responseText);
         console.log('✅ Successfully parsed as JSON:', parsedAnalysis);
       } catch (parseError) {
         // If parsing fails, check if it's a markdown table and convert it
