@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: config.ollama.model,
+          model: config.ollama.visionModel,
           prompt: PROMPT,
           images: [base64Data],
           stream: false,

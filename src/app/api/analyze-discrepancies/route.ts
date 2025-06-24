@@ -31,7 +31,7 @@ ${JSON.stringify(documents, null, 2)}`;
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: config.ollama.model,
+          model: config.ollama.reasoningModel,
           prompt,
           stream: false,
           format: 'json',

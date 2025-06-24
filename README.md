@@ -21,6 +21,7 @@ A simple, elegant document analysis tool powered by AI.
 
    ```bash
    ollama pull qwen2.5vl
+   ollama pull deepseek-r1:8b
    OLLAMA_HOST=0.0.0.0:1234 ollama serve
    ```
 

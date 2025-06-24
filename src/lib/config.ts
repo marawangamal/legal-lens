@@ -2,6 +2,7 @@
 export const config = {
   ollama: {
     baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:1234',
-    model: 'qwen2.5vl',
+    visionModel: 'qwen2.5vl',
+    reasoningModel: 'deepseek-r1:8b',
   },
 };
